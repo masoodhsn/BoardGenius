@@ -1,50 +1,56 @@
+import copy
 
-def minmax_search(self,board,score_board,turn):
-		t1,t2,s=self.max_value(board,self.STEP-1,score_board,turn,1000000)
-		return t1,t2
+class BoardGenius:
+	def __init__(self,give_score,give_action,action_resualt,toggle_turn):
+		self.score=give_score
+		self.action=give_action
+		self.action_r=action_resualt
+		self.toggle=toggle_turn
 
-def max_value(self,board,step,score_board,turn,limit):
-	opponent = "W" if turn == "B" else "B"
-	if(step==-1 or not self.has_valid_move(board, turn)): return -1,-1,self.score(board,turn,score_board)
-	score=0
-	ii,jj=-1,-1
-	for i in range(self.BOARD_SIZE):
-		for j in range(self.BOARD_SIZE):
-			if(self.is_valid_move(board,i,j,turn)):
+
+	def minmax_search(self,step,board,turn,is_valid,has_valid):
+		act,s=self.max_value(board,step,turn,float('inf'),is_valid,has_valid)
+
+		return act
+
+	def max_value(self,board,step,turn,limit,is_valid,has_valid):
+		opponent = self.toggle(turn)
+		if(step==-1 or not has_valid(board, turn)): return -1,self.score(board,turn)
+		score=0
+		act=-1
+		for i in self.action():
+			if(is_valid(board,i,turn)):
 				temp_board= copy.deepcopy(board)
-				self.apply_move(temp_board,i,j,turn)
-
-				if (step == self.STEP-1 and self.score(board,opponent,score_board)==0):
-					return i,j,0
-
-				t1,t2,s=self.min_value(temp_board,step-1,score_board,opponent,score)
+				self.action_r(temp_board,i,turn)
+				#if (step == self.STEP-1 and self.score(board,opponent)==0):
+				#	return i,j,0
+				temp_act,s=self.min_value(temp_board,step-1,opponent,score,is_valid,has_valid)
 				if (s > score and s>0):
 					score=s
-					ii=i
-					jj=j
+					act=i
 					if(s>limit):
-						return -1,-1,0
+						return -1,0
 				
 
-	return ii,jj,score
+		return act,score
 
 
-def min_value(self,board,step,score_board,turn,limit):
-	opponent = "W" if turn == "B" else "B"
-	if(step==-1 or not self.has_valid_move(board, turn)): return -1,-1,self.score(board,opponent,score_board)
-	score=1000000
-	ii,jj=-1,-1
-	for i in range(self.BOARD_SIZE):
-		for j in range(self.BOARD_SIZE):
-			if(self.is_valid_move(board,i,j,turn)):
+	def min_value(self,board,step,turn,limit,is_valid,has_valid):
+		opponent = self.toggle(turn)
+		if(step==-1 or not has_valid(board, turn)): return -1,self.score(board,opponent)
+		score=float('inf')
+		act=-1
+		for i in self.action():
+			if(is_valid(board,i,turn)):
 				temp_board= copy.deepcopy(board)
-				self.apply_move(temp_board,i,j,turn)
-				t1,t2,s=self.max_value(temp_board,step-1,score_board,opponent,score)
+				self.action_r(temp_board,i,turn)
+				temp_act,s=self.max_value(temp_board,step-1,opponent,score,is_valid,has_valid)
 				if (s < score and s >0):
 					score=s
-					ii=i
-					jj=j 
+					act=i
+					
 					if(s<limit):
-						return -1,-1,0
+						return -1,0
 
-	return ii,jj,score
+		return act,score
+
