@@ -1,3 +1,7 @@
+import json
+import copy
+import random
+from math import floor
 import copy
 
 class BoardGenius:
@@ -54,3 +58,71 @@ class BoardGenius:
 
 		return act,score
 
+
+class MyStruct:
+    def __init__(self, number, father, win, loss, state):
+        self.number = number
+        self.father = father
+        self.win = win
+        self.loss=loss
+        self.state = state
+
+    def to_dict(self):
+        return {
+            str(self.number):{
+            'father': self.father,
+            'win': self.win,
+            'number': self.loss,
+            'state': self.state
+            }
+        }
+
+class DataStruct:
+    def __init__(self,*path_):
+        self.path="data.json"
+        if len(path_)==1:
+            self.path=path_[0]
+        if not path.endswith(".json"):
+            path=str(path)+".json"
+		
+    def save(self,data,win): 
+        fe=self.fetch()
+        for key, value in data.items():
+             if key in fe:
+                 fe[key] = value 
+             else:
+                 fe.update(data)
+
+        father=list(data.values())[0]["father"]
+        while(father != -1):
+            
+             data={str(father):fe[str(father)]}
+             data[str(father)]['number']+=1
+             if win == 1:
+                 data[str(father)]['win']+=1
+
+             for key, value in data.items():
+                if key in fe:
+                    fe[key] = value 
+                else:
+                    fe.update(data)
+
+             father=list(data.values())[0]["father"]
+
+
+             with open(self.path, "w", encoding="utf-8") as json_file:
+                json.dump(fe, json_file, ensure_ascii=False, indent=4)
+
+
+
+
+    def fetch(self):
+        try:
+        
+            with open(self.path, "r", encoding="utf-8") as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            data = {}
+
+        return data
+        
